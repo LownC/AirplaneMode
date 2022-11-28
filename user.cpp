@@ -405,11 +405,14 @@ void user_reservation(vector<string> v, string userID) //v[0] 명령어 - flight
 	while (1) {
 		cout << "Will you use your Mileage?" << endl;
 		cout << "yes or no? please endter Y or y or N or n" << endl;
+
 		cin.getline(yesorno, 100, '\n');
+		cin.clear();
 		if (strlen(yesorno) != 1)
+
 			continue;
-		if (yesorno == "Y" || yesorno == "N" || yesorno == "y" || yesorno == "N");
-		break;
+		if (yesorno[0] == 'Y' || yesorno[0] == 'N' || yesorno[0] == 'y' || yesorno[0] == 'n')
+			break;
 	}
 
 	int indexf = -1;
@@ -498,11 +501,16 @@ void user_reservation(vector<string> v, string userID) //v[0] 명령어 - flight
 
 		}
 		readFile.close();
-
+	
 		for (int i = 0; i < user_datal.size(); i = i + 7) { // 유저 아이디 검사. // 마일리지가 추가 되었으므로 7로 변경
 
 			if (user_datal.at(i) == userID) {
-				if (yesorno == "Y" || yesorno == "y") {//마일리지를 사용하는 경우
+				if (yesorno[0] == 'Y' || yesorno[0] == 'y') {//마일리지를 사용하는 경우
+					if (user_datal.at(i + 6) == "0") {
+						cout << "You have no mileage" << endl;
+						user_prompt(userID);
+						return;
+					}
 					if (stoi(user_datal.at(i + 5)) + stoi(user_datal.at(i + 6)) < stoi(f_info.at(3))) {//마일리지 + 돈 적으면 안됨
 						cout << "Not enough user asset for flight!" << endl;
 						user_prompt(userID);
@@ -515,17 +523,18 @@ void user_reservation(vector<string> v, string userID) //v[0] 명령어 - flight
 						string mil;
 						while (1) { // 숫자로만 입력할때 까지 반복 만약, 숫자로만 입력했다면 계산후 나감.
 							cout << "how much will you use mileage?" << endl;
-							cin >> mil;
+							getline(cin,mil);
+							cin.clear();
 							int check_num = 0;
 							for (int r = 0; r < mil.size(); r++) {
 								if (mil[r] < '0' || mil[r]>'9')// 숫자로 이루어진게 아니라면
 								{
 									cout << "you can input only disit!" << endl;
-									break;
+									continue;
 								}
 								check_num++;
 							}
-							if (check_num == mil.size() - 1) {// 숫자로만 입력한 경우
+							if (check_num == mil.size()) {// 숫자로만 입력한 경우
 								if (stoi(mil) > stoi(user_datal.at(i + 6))) {
 									cout << "you can not use mileag more than your mileage asset!" << endl;
 									continue;
@@ -543,10 +552,11 @@ void user_reservation(vector<string> v, string userID) //v[0] 명령어 - flight
 						int result = stoi(user_datal.at(i + 5)) - stoi(f_info.at(3)) + stoi(mil);
 						int result2 = stoi(user_datal.at(i + 6)) - stoi(mil);
 						stringstream ssint;
+						stringstream ssint2;
 						ssint << result;
 						user_datal.at(i + 5) = ssint.str();
-						ssint << result2;
-						user_datal.at(i + 6) == ssint.str();
+						ssint2 << result2;
+						user_datal.at(i + 6) = ssint2.str();
 						ofstream writeFile_user;
 						writeFile_user.open(path2, ios::out);
 						if (writeFile_user.is_open()) {
@@ -555,7 +565,7 @@ void user_reservation(vector<string> v, string userID) //v[0] 명령어 - flight
 									writeFile_user << "^" + user_datal.at(j) + "^" + user_datal.at(j + 1) + "^" + user_datal.at(j + 2) + "^" + user_datal.at(j + 3) + "^" + user_datal.at(j + 4) + "^" + user_datal.at(j + 5) + "^" + user_datal.at(j + 6) + "^";
 								}
 								else {
-									writeFile_user << "^" + user_datal.at(j) + "^" + user_datal.at(j + 1) + "^" + user_datal.at(j + 2) + "^" + user_datal.at(j + 3) + "^" + user_datal.at(j + 4) + "^" + user_datal.at(j + 5) + "^" + user_datal.at(j + 6) + "^" << endl; ;
+									writeFile_user << "^" + user_datal.at(j) + "^" + user_datal.at(j + 1) + "^" + user_datal.at(j + 2) + "^" + user_datal.at(j + 3) + "^" + user_datal.at(j + 4) + "^" + user_datal.at(j + 5) + "^" + user_datal.at(j + 6) + "^" << endl;
 								}
 							}
 						}
@@ -564,7 +574,7 @@ void user_reservation(vector<string> v, string userID) //v[0] 명령어 - flight
 					}//예금 + 마일리지 > 항공기 가격인 경우
 					break;
 				}
-				else if (yesorno == "N" || yesorno == "n") {
+				else if (yesorno[0] == 'N' || yesorno[0] == 'n') {
 					if (stoi(user_datal.at(i + 5)) < stoi(f_info.at(3))) {
 						cout << "Not enought user asset for flight!" << endl;
 						user_prompt(userID);
@@ -573,9 +583,14 @@ void user_reservation(vector<string> v, string userID) //v[0] 명령어 - flight
 					else {// 유저데이터 파일에 가격 바꿔쓰기.
 
 						int result = stoi(user_datal.at(i + 5)) - stoi(f_info.at(3));
+						int result2 = (stoi(f_info.at(3)) / 10) + stoi(user_datal.at(i + 6));
 						stringstream ssint;
+						stringstream ssint2;
 						ssint << result;
 						user_datal.at(i + 5) = ssint.str();
+						ssint2 << result2;
+						user_datal.at(i + 6) = ssint2.str();
+					
 
 						ofstream writeFile_user;
 						writeFile_user.open(path2, ios::out);
@@ -585,7 +600,7 @@ void user_reservation(vector<string> v, string userID) //v[0] 명령어 - flight
 									writeFile_user << "^" + user_datal.at(j) + "^" + user_datal.at(j + 1) + "^" + user_datal.at(j + 2) + "^" + user_datal.at(j + 3) + "^" + user_datal.at(j + 4) + "^" + user_datal.at(j + 5) + "^" + user_datal.at(j + 6) + "^";
 								}
 								else {
-									writeFile_user << "^" + user_datal.at(j) + "^" + user_datal.at(j + 1) + "^" + user_datal.at(j + 2) + "^" + user_datal.at(j + 3) + "^" + user_datal.at(j + 4) + "^" + user_datal.at(j + 5) + "^" + user_datal.at(j + 6) + "^" << endl; ;
+									writeFile_user << "^" + user_datal.at(j) + "^" + user_datal.at(j + 1) + "^" + user_datal.at(j + 2) + "^" + user_datal.at(j + 3) + "^" + user_datal.at(j + 4) + "^" + user_datal.at(j + 5) + "^" + user_datal.at(j + 6) + "^" << endl;
 								}
 							}
 						}
@@ -597,6 +612,7 @@ void user_reservation(vector<string> v, string userID) //v[0] 명령어 - flight
 
 		}
 		//항공기에 예약자 명단 추가
+		cin.clear();
 		ofstream writeFile;
 		writeFile.open(path, ios::app);
 		if (writeFile.is_open()) {
@@ -607,10 +623,8 @@ void user_reservation(vector<string> v, string userID) //v[0] 명령어 - flight
 		user_prompt(userID);
 		return;
 	}
-
 	user_prompt(userID);
-
-
+	return;
 }
 
 
@@ -763,7 +777,12 @@ void user_deposit(string iMoney, string userID)
 			while (getline(ss, stringBuffer, '^')) {
 				tempVector.push_back(stringBuffer);
 			}
-			tempVector[6] = to_string(money + stoi(tempVector[6]));
+			if (money + stoi(tempVector[6]) > 999999999) {
+				tempVector[6] = to_string(999999999);
+				cout << "User can have maximum 999999999." << endl;
+			}else
+				tempVector[6] = to_string(money + stoi(tempVector[6]));
+			
 			for (auto iter : tempVector) {
 				if (iter != "")tempString.append("^" + iter);
 			}
@@ -813,6 +832,17 @@ void user_information(string userID)
 		}
 	}
 	if(tempVector.size() > 8) tempVector[8] = "";
+
+
+	if (tempVector[3] == "1") {
+		tempVector[3] = "M";
+	}
+	else if (tempVector[3] == "0") {
+		tempVector[3] = "W";
+	}
+
+	tempVector[4] = "010" + tempVector[4];
+
 	for (auto i : tempVector) {
 		if(i != "") cout << i << " ";
 	}
@@ -821,32 +851,33 @@ void user_information(string userID)
 
 	int user_res_count = 0;		//몇 개 예약했는지 세는 변수
 	vector<string> user_res;	//모든 예약 정보 담을 벡터	
-	for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(std::filesystem::current_path() / "data/airplane")) {		//폴더안 돌면서
-		FILE* airplane_file = NULL;
-		vector<string> airplane_file_All;	//파일 안 모든 내용 담을 벡터
-		char buffer_forAirplane[128];
-		string airplaneName;	//항공편이름 담는 변수
-		vector<string> vecForairplaneName;		//항공편이름 가져올 때 "^" 스플릿한 문자열 저장할 벡터
-		if (0 == fopen_s(&airplane_file, entry.path().string().c_str(), "rt")) {
-			while (fgets(buffer, 128, airplane_file) != NULL) {
-				airplane_file_All.push_back(buffer);	//내용 다 담기
+	if (std::filesystem::exists("./data/airplane")) {
+		for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(std::filesystem::current_path() / "data/airplane")) {		//폴더안 돌면서
+			FILE* airplane_file = NULL;
+			vector<string> airplane_file_All;	//파일 안 모든 내용 담을 벡터
+			char buffer_forAirplane[128];
+			string airplaneName;	//항공편이름 담는 변수
+			vector<string> vecForairplaneName;		//항공편이름 가져올 때 "^" 스플릿한 문자열 저장할 벡터
+			if (0 == fopen_s(&airplane_file, entry.path().string().c_str(), "rt")) {
+				while (fgets(buffer, 128, airplane_file) != NULL) {
+					airplane_file_All.push_back(buffer);	//내용 다 담기
+				}
+				vecForairplaneName = split_user_data(airplane_file_All[0]);		//구분자 스플릿
+				airplaneName = vecForairplaneName[0];	//항공편 이름 저장
+				fclose(airplane_file);
 			}
-			vecForairplaneName = split_user_data(airplane_file_All[0]);		//구분자 스플릿
-			airplaneName = vecForairplaneName[0];	//항공편 이름 저장
-			fclose(airplane_file);
-		}
-		for (auto i : airplane_file_All) {		//모든 내용 돌면서
-			if (i.find(userID) != string::npos) {		//예약내용 있으면
-				vector<string> userResTempVec = split_user_data(i);		//스플릿
-				user_res.push_back(airplaneName);	//항공편이름 담고
-				user_res.push_back(" ");
-				user_res.push_back(userResTempVec[1]);		//좌석정보 담고
-				user_res.push_back("\n");
-				user_res_count++;
+			for (auto i : airplane_file_All) {		//모든 내용 돌면서
+				if (i.find(userID) != string::npos) {		//예약내용 있으면
+					vector<string> userResTempVec = split_user_data(i);		//스플릿
+					user_res.push_back(airplaneName);	//항공편이름 담고
+					user_res.push_back(" ");
+					user_res.push_back(userResTempVec[1]);		//좌석정보 담고
+					user_res.push_back("\n");
+					user_res_count++;
+				}
 			}
 		}
 	}
-
 	cout << "Total " << user_res_count << " res" << endl;
 	for (auto i : user_res) {
 		cout << i;
@@ -978,3 +1009,4 @@ void user_quit_check(vector<string> v, string user_ID) {
 		return;
 	}
 }
+
